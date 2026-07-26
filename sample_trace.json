@@ -1,0 +1,46 @@
+{
+  "run_id": "brief-2026-07-24-0600",
+  "pipeline": "daily intelligence brief",
+  "started_at": "2026-07-24T06:00:00Z",
+  "spans": [
+    {"id": "geo-01", "agent": "geo", "label": "Scan situation tracker", "start_ms": 0, "end_ms": 1840,
+     "status": "ok", "model": "qwen3.5:4b", "tokens_in": 3120, "tokens_out": 480,
+     "output": "4 active situations carried forward. 1 escalation flagged: shipping insurance rates in the Red Sea corridor up 18% week over week."},
+
+    {"id": "macro-01", "agent": "macro", "label": "Rates and inflation prints", "start_ms": 120, "end_ms": 9400,
+     "status": "ok", "model": "gemma4:31b", "tokens_in": 8900, "tokens_out": 1240,
+     "output": "No new prints overnight. Positioning ahead of Thursday CPI unchanged; front-end pricing implies one cut by year end."},
+
+    {"id": "markets-01", "agent": "markets", "label": "Equity and commodity close", "start_ms": 140, "end_ms": 7620,
+     "status": "ok", "model": "gemma4:31b", "tokens_in": 7400, "tokens_out": 980,
+     "output": "Brent +1.4% on the corridor headline. Energy the only sector green. Breadth negative for a third session."},
+
+    {"id": "crypto-01", "agent": "crypto", "label": "Perp funding and flows", "start_ms": 160, "end_ms": 5210,
+     "status": "ok", "model": "gemma4:31b", "tokens_in": 6100, "tokens_out": 870,
+     "output": "Funding positive across majors but compressing. Open interest flat. No liquidation clusters above 2% of OI."},
+
+    {"id": "crypto-02", "agent": "crypto", "label": "Tweet classification pass", "start_ms": 5210, "end_ms": 11480,
+     "status": "warn", "model": "qwen3.5:4b", "tokens_in": 14200, "tokens_out": 2100,
+     "error": "31 of 412 tweets failed schema validation and were dropped rather than retried.",
+     "output": "412 tweets tagged, 381 retained. Two-stage classifier agreement 91%."},
+
+    {"id": "writer-01", "agent": "writer", "label": "Draft brief", "start_ms": 11600, "end_ms": 24900,
+     "status": "ok", "model": "gemma4:31b", "tokens_in": 19800, "tokens_out": 3400,
+     "output": "Draft assembled. Lead: energy repricing on corridor risk. Secondary: rates positioning into CPI."},
+
+    {"id": "format-01", "agent": "formatter", "label": "Enforce structure", "start_ms": 24900, "end_ms": 26100,
+     "status": "ok", "tokens_in": 3400, "tokens_out": 3400,
+     "output": "fix_headers applied to 3 headings. Frontmatter rebuilt. Two encoding artefacts repaired."},
+
+    {"id": "format-02", "agent": "formatter", "label": "Retry after taxonomy mismatch", "start_ms": 26100, "end_ms": 27050,
+     "status": "error", "tokens_in": 3400, "tokens_out": 0,
+     "error": "Theme 'energy-security' absent from the site taxonomy. Present in vault and pipeline taxonomies only.",
+     "output": ""},
+
+    {"id": "publish-01", "agent": "publisher", "label": "Write to vault", "start_ms": 27050, "end_ms": 27620,
+     "status": "ok", "output": "Written to vault, frontmatter validated."},
+
+    {"id": "publish-02", "agent": "publisher", "label": "Push to site", "start_ms": 27620, "end_ms": 41200,
+     "status": "ok", "output": "Committed and deployed. Build 118s server-side, not counted here."}
+  ]
+}

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>brief-2026-07-24-0600</title>
+<style>
+  :root {
+    --ground: #0E1A1C;
+    --panel: #142326;
+    --rule: #1F3438;
+    --ink: #DCE6E4;
+    --dim: #7C918F;
+    --faint: #4A605E;
+    --playhead: #E8B44A;
+    --gutter: 118px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 13px/1.5 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 28px 72px; }
+
+  /* ---- masthead: the run is an instrument reading, so state it like one ---- */
+  .eyebrow {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 14px;
+  }
+  h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; }
+  .sub { color: var(--dim); font-size: 12px; margin-bottom: 32px; }
+
+  .readout {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule);
+    margin-bottom: 40px;
+  }
+  .cell { background: var(--panel); padding: 14px 16px; }
+  .cell dt {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 6px;
+  }
+  .cell dd { margin: 0; font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .cell dd small { font-size: 11px; color: var(--dim); font-weight: 400; }
+
+  /* ---- the chart ---- */
+  .chart { position: relative; border-top: 1px solid var(--rule); }
+  .ruler {
+    position: relative; height: 26px; border-bottom: 1px solid var(--rule);
+    margin-left: var(--gutter); 
+  }
+  .tick { position: absolute; top: 0; height: 100%; border-left: 1px solid var(--rule); }
+  .tick span {
+    position: absolute; left: 5px; top: 6px; font-size: 10px; color: var(--faint);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+
+  .lane {
+    position: relative; display: grid; grid-template-columns: var(--gutter) 1fr;
+    border-bottom: 1px solid var(--rule); min-height: 42px; align-items: center;
+  }
+  .lane:hover { background: rgba(255,255,255,0.018); }
+  .lane-name {
+    padding-right: 16px; text-align: right; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .lane-track { position: relative; height: 42px; }
+
+  .bar {
+    position: absolute; top: 11px; height: 20px; min-width: 3px;
+    border-radius: 2px; cursor: pointer; border: 0; padding: 0;
+    transform-origin: left center; color: inherit;
+    transition: filter .12s ease;
+  }
+  .bar:hover, .bar:focus-visible { filter: brightness(1.35); }
+  .bar:focus-visible { outline: 2px solid var(--playhead); outline-offset: 2px; }
+  .bar[data-status="error"] { box-shadow: inset 0 0 0 2px #C4574D; }
+  .bar[data-status="warn"]  { box-shadow: inset 0 0 0 2px #E8B44A; }
+  .bar-label {
+    position: absolute; left: 100%; margin-left: 8px; top: 50%;
+    transform: translateY(-50%); font-size: 10px; color: var(--dim);
+    white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- signature: a scope cursor spanning every channel at once ---- */
+  #playhead {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: var(--playhead); opacity: 0; pointer-events: none; z-index: 5;
+  }
+  #playhead::after {
+    content: attr(data-t); position: absolute; top: -1px; left: 6px;
+    background: var(--playhead); color: #0E1A1C; font-size: 10px;
+    padding: 1px 5px; font-weight: 600; white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .chart:hover #playhead { opacity: 1; }
+
+  /* ---- detail ---- */
+  .detail {
+    margin-top: 32px; border: 1px solid var(--rule); background: var(--panel);
+    padding: 20px 22px; min-height: 96px;
+  }
+  .detail h2 { margin: 0 0 3px; font-size: 15px; font-weight: 600; }
+  .detail .meta { color: var(--dim); font-size: 11px; margin-bottom: 16px; }
+  .kv { display: grid; grid-template-columns: 118px 1fr; gap: 5px 18px; font-size: 12px; }
+  .kv dt { color: var(--faint); }
+  .kv dd { margin: 0; word-break: break-word; }
+  .detail pre {
+    margin: 16px 0 0; padding: 14px; background: #0B1517; border: 1px solid var(--rule);
+    font-size: 11px; line-height: 1.6; overflow-x: auto; white-space: pre-wrap;
+    color: var(--dim); max-height: 260px;
+  }
+  .detail .err { color: #E08A80; }
+  .placeholder { color: var(--faint); font-size: 12px; padding-top: 4px; }
+
+  @media (max-width: 640px) {
+    :root { --gutter: 76px; }
+    .wrap { padding: 24px 14px 48px; }
+    h1 { font-size: 20px; }
+    .bar-label { display: none; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bar { animation: draw .42s cubic-bezier(.2,.7,.3,1) backwards; }
+    @keyframes draw { from { transform: scaleX(0); opacity: 0; } }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Agent trace</p>
+  <h1>brief-2026-07-24-0600</h1>
+  <p class="sub">2026-07-24T06:00:00Z · daily intelligence brief · 10 spans</p>
+
+  <dl class="readout"><div class="cell"><dt>wall clock</dt><dd>41.20s</dd></div><div class="cell"><dt>agent time</dt><dd>59.52s <small>1.4x parallel</small></dd></div><div class="cell"><dt>spans</dt><dd>10 <small>7 agents</small></dd></div><div class="cell"><dt>slowest</dt><dd>13.58s <small>publisher</small></dd></div><div class="cell"><dt>tokens</dt><dd>78,790</dd></div><div class="cell"><dt>errors</dt><dd>1</dd></div></dl>
+
+  <div class="chart" id="chart">
+    <div id="playhead"></div>
+    <div class="ruler" id="ruler"><div class="tick" style="left:0.000%"><span>0ms</span></div><div class="tick" style="left:12.136%"><span>5.00s</span></div><div class="tick" style="left:24.272%"><span>10.00s</span></div><div class="tick" style="left:36.408%"><span>15.00s</span></div><div class="tick" style="left:48.544%"><span>20.00s</span></div><div class="tick" style="left:60.680%"><span>25.00s</span></div><div class="tick" style="left:72.816%"><span>30.00s</span></div><div class="tick" style="left:84.951%"><span>35.00s</span></div><div class="tick" style="left:97.087%"><span>40.00s</span></div></div>
+    <div class="lane"><div class="lane-name">geo</div><div class="lane-track"><button class="bar" data-id="geo-01" data-status="ok" style="left:0.000%;width:4.466%;background:#7FA88C;animation-delay:0.00s" title="Scan situation tracker &middot; 1.84s" aria-label="Scan situation tracker, 1.84s, ok"><span class="bar-label">1.84s</span></button></div></div><div class="lane"><div class="lane-name">macro</div><div class="lane-track"><button class="bar" data-id="macro-01" data-status="ok" style="left:0.291%;width:22.524%;background:#C89F6D;animation-delay:0.00s" title="Rates and inflation prints &middot; 9.28s" aria-label="Rates and inflation prints, 9.28s, ok"><span class="bar-label">9.28s</span></button></div></div><div class="lane"><div class="lane-name">markets</div><div class="lane-track"><button class="bar" data-id="markets-01" data-status="ok" style="left:0.340%;width:18.155%;background:#6E90C4;animation-delay:0.00s" title="Equity and commodity close &middot; 7.48s" aria-label="Equity and commodity close, 7.48s, ok"><span class="bar-label">7.48s</span></button></div></div><div class="lane"><div class="lane-name">crypto</div><div class="lane-track"><button class="bar" data-id="crypto-01" data-status="ok" style="left:0.388%;width:12.257%;background:#A98BB5;animation-delay:0.00s" title="Perp funding and flows &middot; 5.05s" aria-label="Perp funding and flows, 5.05s, ok"><span class="bar-label">5.05s</span></button><button class="bar" data-id="crypto-02" data-status="warn" style="left:12.646%;width:15.218%;background:#A98BB5;animation-delay:0.04s" title="Tweet classification pass &middot; 6.27s" aria-label="Tweet classification pass, 6.27s, warn"><span class="bar-label">6.27s</span></button></div></div><div class="lane"><div class="lane-name">writer</div><div class="lane-track"><button class="bar" data-id="writer-01" data-status="ok" style="left:28.155%;width:32.282%;background:#C47D7D;animation-delay:0.10s" title="Draft brief &middot; 13.30s" aria-label="Draft brief, 13.30s, ok"><span class="bar-label">13.30s</span></button></div></div><div class="lane"><div class="lane-name">formatter</div><div class="lane-track"><button class="bar" data-id="format-01" data-status="ok" style="left:60.437%;width:2.913%;background:#8FA5A0;animation-delay:0.21s" title="Enforce structure &middot; 1.20s" aria-label="Enforce structure, 1.20s, ok"><span class="bar-label">1.20s</span></button><button class="bar" data-id="format-02" data-status="error" style="left:63.350%;width:2.306%;background:#8FA5A0;animation-delay:0.22s" title="Retry after taxonomy mismatch &middot; 950ms" aria-label="Retry after taxonomy mismatch, 950ms, error"><span class="bar-label">950ms</span></button></div></div><div class="lane"><div class="lane-name">publisher</div><div class="lane-track"><button class="bar" data-id="publish-01" data-status="ok" style="left:65.655%;width:1.383%;background:#B79A6B;animation-delay:0.23s" title="Write to vault &middot; 570ms" aria-label="Write to vault, 570ms, ok"><span class="bar-label">570ms</span></button><button class="bar" data-id="publish-02" data-status="ok" style="left:67.039%;width:32.961%;background:#B79A6B;animation-delay:0.23s" title="Push to site &middot; 13.58s" aria-label="Push to site, 13.58s, ok"><span class="bar-label">13.58s</span></button></div></div>
+  </div>
+
+  <div class="detail" id="detail">
+    <p class="placeholder">Select a span to inspect its payload. Hover the chart for a time cursor.</p>
+  </div>
+</div>
+
+<script>
+const SPANS = [{"id": "geo-01", "agent": "geo", "label": "Scan situation tracker", "status": "ok", "start_ms": 0, "end_ms": 1840, "model": "qwen3.5:4b", "tokens_in": 3120, "tokens_out": 480, "error": "", "output": "4 active situations carried forward. 1 escalation flagged: shipping insurance rates in the Red Sea corridor up 18% week over week."}, {"id": "macro-01", "agent": "macro", "label": "Rates and inflation prints", "status": "ok", "start_ms": 120, "end_ms": 9400, "model": "gemma4:31b", "tokens_in": 8900, "tokens_out": 1240, "error": "", "output": "No new prints overnight. Positioning ahead of Thursday CPI unchanged; front-end pricing implies one cut by year end."}, {"id": "markets-01", "agent": "markets", "label": "Equity and commodity close", "status": "ok", "start_ms": 140, "end_ms": 7620, "model": "gemma4:31b", "tokens_in": 7400, "tokens_out": 980, "error": "", "output": "Brent +1.4% on the corridor headline. Energy the only sector green. Breadth negative for a third session."}, {"id": "crypto-01", "agent": "crypto", "label": "Perp funding and flows", "status": "ok", "start_ms": 160, "end_ms": 5210, "model": "gemma4:31b", "tokens_in": 6100, "tokens_out": 870, "error": "", "output": "Funding positive across majors but compressing. Open interest flat. No liquidation clusters above 2% of OI."}, {"id": "crypto-02", "agent": "crypto", "label": "Tweet classification pass", "status": "warn", "start_ms": 5210, "end_ms": 11480, "model": "qwen3.5:4b", "tokens_in": 14200, "tokens_out": 2100, "error": "31 of 412 tweets failed schema validation and were dropped rather than retried.", "output": "412 tweets tagged, 381 retained. Two-stage classifier agreement 91%."}, {"id": "writer-01", "agent": "writer", "label": "Draft brief", "status": "ok", "start_ms": 11600, "end_ms": 24900, "model": "gemma4:31b", "tokens_in": 19800, "tokens_out": 3400, "error": "", "output": "Draft assembled. Lead: energy repricing on corridor risk. Secondary: rates positioning into CPI."}, {"id": "format-01", "agent": "formatter", "label": "Enforce structure", "status": "ok", "start_ms": 24900, "end_ms": 26100, "model": "", "tokens_in": 3400, "tokens_out": 3400, "error": "", "output": "fix_headers applied to 3 headings. Frontmatter rebuilt. Two encoding artefacts repaired."}, {"id": "format-02", "agent": "formatter", "label": "Retry after taxonomy mismatch", "status": "error", "start_ms": 26100, "end_ms": 27050, "model": "", "tokens_in": 3400, "tokens_out": 0, "error": "Theme 'energy-security' absent from the site taxonomy. Present in vault and pipeline taxonomies only.", "output": ""}, {"id": "publish-01", "agent": "publisher", "label": "Write to vault", "status": "ok", "start_ms": 27050, "end_ms": 27620, "model": "", "tokens_in": 0, "tokens_out": 0, "error": "", "output": "Written to vault, frontmatter validated."}, {"id": "publish-02", "agent": "publisher", "label": "Push to site", "status": "ok", "start_ms": 27620, "end_ms": 41200, "model": "", "tokens_in": 0, "tokens_out": 0, "error": "", "output": "Committed and deployed. Build 118s server-side, not counted here."}];
+const T0 = 0, SPAN_MS = 41200;
+
+function fmt(ms) { return ms < 1000 ? ms.toFixed(0) + "ms" : (ms / 1000).toFixed(2) + "s"; }
+
+const chart = document.getElementById("chart");
+const playhead = document.getElementById("playhead");
+const ruler = document.getElementById("ruler");
+
+chart.addEventListener("pointermove", (e) => {
+  const box = ruler.getBoundingClientRect();
+  const x = e.clientX - box.left;
+  if (x < 0 || x > box.width) { playhead.style.opacity = 0; return; }
+  playhead.style.opacity = 1;
+  playhead.style.left = (e.clientX - chart.getBoundingClientRect().left) + "px";
+  playhead.dataset.t = fmt((x / box.width) * SPAN_MS);
+});
+chart.addEventListener("pointerleave", () => { playhead.style.opacity = 0; });
+
+const detail = document.getElementById("detail");
+function show(id) {
+  const s = SPANS.find(x => x.id === id);
+  if (!s) return;
+  const rows = [
+    ["agent", s.agent],
+    ["status", s.status],
+    ["start", fmt(s.start_ms - T0)],
+    ["duration", fmt(s.end_ms - s.start_ms)],
+  ];
+  if (s.model) rows.push(["model", s.model]);
+  if (s.tokens_in || s.tokens_out) {
+    rows.push(["tokens", s.tokens_in.toLocaleString() + " in / " + s.tokens_out.toLocaleString() + " out"]);
+  }
+  detail.innerHTML =
+    "<h2>" + s.label + "</h2>" +
+    "<p class='meta'>" + s.id + "</p>" +
+    "<dl class='kv'>" + rows.map(r => "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>").join("") + "</dl>" +
+    (s.error ? "<pre class='err'>" + s.error + "</pre>" : "") +
+    (s.output ? "<pre>" + s.output + "</pre>" : "");
+}
+
+document.querySelectorAll(".bar").forEach(bar => {
+  bar.addEventListener("click", () => show(bar.dataset.id));
+  bar.addEventListener("focus", () => show(bar.dataset.id));
+});
+</script>
+</body>
+</html>
